@@ -18,6 +18,7 @@
 	},
 	"homepage": "https://github.com/xtiane/terminal-leave-calculator-node#readme",
 	"dependencies": {
-		"inquirer": "^7.3.0"
+		"inquirer": "^7.3.0",
+		"moment": "^2.27.0"
 	}
 }
