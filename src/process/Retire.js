@@ -25,9 +25,9 @@ const calculateRetirementDate = function calculateRetirementDate(
 	enlistOrCommissionDate
 ) {
 	try {
-		// Make sure this is a valid date
 		const momentEnlistOrCommDate = moment(enlistOrCommissionDate, 'DD/MM/YYYY');
-		momentEnlistOrCommDate.add(1, 'months').startOf('month');
+		momentEnlistOrCommDate.add(1, 'months').startOf('month').add(20, 'years');
+		return momentEnlistOrCommDate.format('DD/MM/YYYY');
 	} catch (error) {
 		throw new Error(
 			`Error encountered while attempting to calculate retirement date.\n${error}`
@@ -61,6 +61,13 @@ const enterEnlistmentOrCommissionDate = {
 	validate: validateDate,
 };
 
+const enterConusOrOconus = {
+	type: 'list',
+	name: 'conusOrOconus',
+	message: 'At the time of retirement, will you be CONUS or OCONUS?',
+	choices: ['CONUS', 'OCONUS'],
+};
+
 const promptUser = async function promptUser() {
 	const userInput = {
 		retirementDate: '',
@@ -79,9 +86,8 @@ const promptUser = async function promptUser() {
 		const enlistOrCommissionDateInput = await inquirer.prompt(
 			enterEnlistmentOrCommissionDate
 		);
-		console.log(`---> ${JSON.stringify(enlistOrCommissionDateInput, null, 2)}`);
 		const { enlistOrCommissionDate } = enlistOrCommissionDateInput;
-		calculateRetirementDate(enlistOrCommissionDate);
+		userInput.retirementDate = calculateRetirementDate(enlistOrCommissionDate);
 	} else {
 		throw new Error(`Unhandled planToRetire encountered ${planToRetire}`);
 	}
