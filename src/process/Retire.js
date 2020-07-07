@@ -2,6 +2,7 @@
 
 const inquirer = require('inquirer');
 const moment = require('moment');
+const { maxStandardDaysOfLeave } = require('../helpers/calculations');
 
 const validateFirstOfMonthDate = function validateFirstOfMonthDate(value) {
 	const pass = value.match(/01\/\d{2}\/\d{4}/);
@@ -132,6 +133,7 @@ const promptUser = async function promptUser() {
 		const { daysOfLeaveInput } = await inquirer.prompt(enterDaysOfLeave);
 		userInput.daysOfLeave = daysOfLeaveInput;
 	} else if (daysOfLeaveChoiceInput.daysOfLeave === daysOfLeaveChoices[1]) {
+		maxStandardDaysOfLeave(userInput.retirementDate);
 	} else {
 		throw new Error(`Unhandled daysOfLeave choice encountered ${planToRetire}`);
 	}
