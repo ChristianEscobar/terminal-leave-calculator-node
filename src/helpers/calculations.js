@@ -83,12 +83,18 @@ const monthsInFiscalYear = function monthsInFiscalYear(retirementDate) {
 	}
 };
 
-const maxStandardDaysOfLeave = function maxStandardDaysOfLeave(retirementDate) {
+const maxStandardDaysOfLeave = function maxStandardDaysOfLeave(
+	retirementDate,
+	conusOconusDays
+) {
 	try {
 		let daysOfLeave = 0;
 		//  60 days for fiscal year previous to retirement date (Fiscal year is Oct 1 – Sep 30th)
 		daysOfLeave += 60;
-		monthsInFiscalYear(retirementDate);
+		const months = monthsInFiscalYear(retirementDate);
+		const daysOfLeaveInFiscalYear = months * 2.5;
+
+		return (daysOfLeave += daysOfLeaveInFiscalYear + conusOconusDays);
 	} catch (error) {
 		throw new Error(
 			`Error encountered while calculating max days of leave.\n${error}`
@@ -96,6 +102,21 @@ const maxStandardDaysOfLeave = function maxStandardDaysOfLeave(retirementDate) {
 	}
 };
 
+const startTerminalPTDY = function startTerminalPTDY(userInput) {
+	try {
+		const startTerminalPTDYDate = moment(
+			userInput.retirementDate,
+			'DD/MM/YYYY'
+		).subtract(userInput.daysOfLeave, 'days');
+		return startTerminalPTDYDate.format('MM/DD/YYYY');
+	} catch (error) {
+		throw new Error(
+			`Error encountered while calculating terminal PTDY date.\n${error}`
+		);
+	}
+};
+
 module.exports = {
 	maxStandardDaysOfLeave,
+	startTerminalPTDY,
 };
