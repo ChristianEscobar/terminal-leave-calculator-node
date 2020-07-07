@@ -3,49 +3,25 @@ const MomentRange = require('moment-range');
 
 const moment = MomentRange.extendMoment(Moment);
 
-const getPreviousFiscalYear = function getPreviousFiscalYear(retirementDate) {
-	try {
-		const retirementMonth = moment(retirementDate, 'DD/MM/YYYY').month();
-		let yearOffset = 0;
-
-		if (retirementMonth >= 1 && retirementMonth <= 10) {
-			yearOffset = 1;
-		}
-
-		const fiscalYearEnd = moment(retirementDate, 'DD/MM/YYYY')
-			.clone()
-			.subtract(yearOffset, 'year')
-			.month('September')
-			.endOf('month');
-
-		const fiscalYearStart = moment(fiscalYearEnd, 'DD/MM/YYYY')
-			.clone()
-			.subtract(1, 'year')
-			.month('October')
-			.startOf('month');
-
-		return {
-			fiscalYeartStart: fiscalYearStart.format('MM/DD/YYYY'),
-			fiscalYearEnd: fiscalYearEnd.format('MM/DD/YYYY'),
-		};
-	} catch (error) {
-		throw new Error(
-			`Error encountered while calculating previous fiscal year.\n${error}`
-		);
-	}
-};
-
+/**
+ * Calculates the fiscal year the specified retirement date belongs to.
+ * @param {string} retirementDate - The retirement date
+ * @returns {string} Object.fiscalYeartStart - The fiscal year start date
+ * @returns {string} Object.fiscalYearEnd - The fiscal year end date
+ * @throws Error
+ */
 const getFiscalYear = function getFiscalYear(retirementDate) {
 	try {
 		const retirementMonth = moment(retirementDate, 'DD/MM/YYYY').month();
 		let yearOffset = 0;
 
+		// Months in momentjs are 0 based.  Handle cases when the
+		// retirement falls on a month when the fiscal year changes
 		if (retirementMonth >= 9 && retirementMonth <= 11) {
 			yearOffset = 1;
 		}
 
 		const fiscalYearEnd = moment(retirementDate, 'DD/MM/YYYY')
-			.clone()
 			.add(yearOffset, 'year')
 			.month('September')
 			.endOf('month');
@@ -67,7 +43,14 @@ const getFiscalYear = function getFiscalYear(retirementDate) {
 	}
 };
 
-const monthsInFiscalYear = function monthsInFiscalYear(retirementDate) {
+/**
+ * Calculates the number of months from the start of the fiscal year
+ * to the specified retirement date
+ * @param {string} retirementDate - The retirement date
+ * @returns {number} The number of months since the fiscal year start
+ * @throws Error
+ */
+const monthsIntoFiscalYear = function monthsIntoFiscalYear(retirementDate) {
 	try {
 		const currentFiscalYear = getFiscalYear(retirementDate);
 
@@ -83,15 +66,22 @@ const monthsInFiscalYear = function monthsInFiscalYear(retirementDate) {
 	}
 };
 
+/**
+ * Calculates the mas standard days of leave
+ * @param {string} retirementDate - The retirement date
+ * @param {number} conusOconusDays - Leave days based on CONUS or OCONUS
+ * @returns {number} The max standard days of leave
+ * @throws Error
+ */
 const maxStandardDaysOfLeave = function maxStandardDaysOfLeave(
 	retirementDate,
 	conusOconusDays
 ) {
 	try {
-		let daysOfLeave = 0;
 		//  60 days for fiscal year previous to retirement date (Fiscal year is Oct 1 – Sep 30th)
-		daysOfLeave += 60;
-		const months = monthsInFiscalYear(retirementDate);
+		let daysOfLeave = 60;
+
+		const months = monthsIntoFiscalYear(retirementDate);
 		const daysOfLeaveInFiscalYear = months * 2.5;
 
 		return (daysOfLeave += daysOfLeaveInFiscalYear + conusOconusDays);
@@ -102,12 +92,22 @@ const maxStandardDaysOfLeave = function maxStandardDaysOfLeave(
 	}
 };
 
-const startTerminalPTDY = function startTerminalPTDY(userInput) {
+/**
+ * Calculates the earliest date when terminal PTDY can start
+ * @param {string} retirementDate - The retirement date
+ * @param {number} totalDaysOfLeave - The total number of leave days
+ * @returns{string} The earliest terminal PTDY and leave date
+ * @throws Error
+ */
+const startTerminalPTDY = function startTerminalPTDY(
+	retirementDate,
+	totalDaysOfLeave
+) {
 	try {
-		const startTerminalPTDYDate = moment(
-			userInput.retirementDate,
-			'DD/MM/YYYY'
-		).subtract(userInput.daysOfLeave, 'days');
+		const startTerminalPTDYDate = moment(retirementDate, 'DD/MM/YYYY').subtract(
+			totalDaysOfLeave,
+			'days'
+		);
 		return startTerminalPTDYDate.format('MM/DD/YYYY');
 	} catch (error) {
 		throw new Error(
