@@ -146,7 +146,9 @@ const promptUser = async function promptUser() {
 	// End Days of leave
 
 	console.log(userInput);
-	console.log(startTerminalPTDY(userInput));
+	console.log(
+		startTerminalPTDY(userInput.retirementDate, userInput.daysOfLeave)
+	);
 };
 
 class Retire {
