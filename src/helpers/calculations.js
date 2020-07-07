@@ -1,8 +1,31 @@
+'use strict';
+
 const Moment = require('moment');
 const MomentRange = require('moment-range');
 
 const moment = MomentRange.extendMoment(Moment);
 
+/**
+ * Calculates a retirement date based on the specified enlistment or commission date
+ * @param {string} enlistOrCommissionDate - The enlistment or commission date
+ * @returns {string} Retirement date
+ * @throws Error
+ */
+const calculateRetirementDate = function calculateRetirementDate(
+	enlistOrCommissionDate
+) {
+	try {
+		const momentEnlistOrCommDate = moment(enlistOrCommissionDate, 'DD/MM/YYYY')
+			.add(1, 'months')
+			.startOf('month')
+			.add(20, 'years');
+		return momentEnlistOrCommDate.format('DD/MM/YYYY');
+	} catch (error) {
+		throw new Error(
+			`Error encountered while attempting to calculate retirement date.\n${error}`
+		);
+	}
+};
 /**
  * Calculates the fiscal year the specified retirement date belongs to.
  * @param {string} retirementDate - The retirement date
@@ -117,6 +140,7 @@ const startTerminalPTDY = function startTerminalPTDY(
 };
 
 module.exports = {
+	calculateRetirementDate,
 	maxStandardDaysOfLeave,
 	startTerminalPTDY,
 };

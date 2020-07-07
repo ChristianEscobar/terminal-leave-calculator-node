@@ -3,6 +3,7 @@
 const inquirer = require('inquirer');
 const moment = require('moment');
 const {
+	calculateRetirementDate,
 	maxStandardDaysOfLeave,
 	startTerminalPTDY,
 } = require('../helpers/calculations');
@@ -32,20 +33,6 @@ const validateInputIsNumbersOnly = function validateInputIsNumbersOnly(value) {
 	}
 
 	return 'Only numbers are allowed';
-};
-
-const calculateRetirementDate = function calculateRetirementDate(
-	enlistOrCommissionDate
-) {
-	try {
-		const momentEnlistOrCommDate = moment(enlistOrCommissionDate, 'DD/MM/YYYY');
-		momentEnlistOrCommDate.add(1, 'months').startOf('month').add(20, 'years');
-		return momentEnlistOrCommDate.format('DD/MM/YYYY');
-	} catch (error) {
-		throw new Error(
-			`Error encountered while attempting to calculate retirement date.\n${error}`
-		);
-	}
 };
 
 const retirementDateChoices = [
