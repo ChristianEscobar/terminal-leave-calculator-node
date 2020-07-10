@@ -1,29 +1,30 @@
 {
-	"name": "terminal-leave-calculator-node",
-	"version": "1.0.0",
-	"description": "Terminal Leave Calculator",
-	"main": "index.js",
-	"scripts": {
-		"test": "jest",
-		"dev": "node index.js"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/xtiane/terminal-leave-calculator-node.git"
-	},
-	"author": "Christian Escobar crs.escobar@gmail.com",
-	"license": "ISC",
-	"bugs": {
-		"url": "https://github.com/xtiane/terminal-leave-calculator-node/issues"
-	},
-	"homepage": "https://github.com/xtiane/terminal-leave-calculator-node#readme",
-	"dependencies": {
-		"inquirer": "^7.3.0",
-		"moment": "^2.27.0",
-		"moment-range": "^4.0.2",
-		"rxjs": "^6.6.0"
-	},
-	"devDependencies": {
-		"jest": "^26.1.0"
-	}
+    "name": "terminal-leave-calculator-node",
+    "version": "1.0.0",
+    "description": "Terminal Leave Calculator",
+    "main": "index.js",
+    "scripts": {
+        "test": "nyc --clean jest --no-cache --coverage src/__tests__/*.test.js",
+        "dev": "node index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/xtiane/terminal-leave-calculator-node.git"
+    },
+    "author": "Christian Escobar crs.escobar@gmail.com",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/xtiane/terminal-leave-calculator-node/issues"
+    },
+    "homepage": "https://github.com/xtiane/terminal-leave-calculator-node#readme",
+    "dependencies": {
+        "inquirer": "^7.3.0",
+        "moment": "^2.27.0",
+        "moment-range": "^4.0.2",
+        "nyc": "^15.1.0",
+        "rxjs": "^6.6.0"
+    },
+    "devDependencies": {
+        "jest": "^25.1.0"
+    }
 }

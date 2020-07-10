@@ -1,0 +1,16 @@
+{
+    "tempDirectory": "./coverage",
+    "all": true,
+    "check-coverage": true,
+    "lines": 100,
+    "functions": 100,
+    "branches": 100,
+    "statements": 100,
+    "exclude": [
+        "src/process",
+        "src/__tests__",
+        "index.js",
+        "src/main.js",
+        "__mocks__"
+    ]
+}
