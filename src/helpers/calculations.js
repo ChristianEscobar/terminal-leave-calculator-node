@@ -12,20 +12,24 @@ const moment = MomentRange.extendMoment(Moment);
  * @throws Error
  */
 const calculateRetirementDate = function calculateRetirementDate(
-	enlistOrCommissionDate
+  enlistOrCommissionDate
 ) {
-	try {
-		const momentEnlistOrCommDate = moment(enlistOrCommissionDate, 'DD/MM/YYYY')
-			.add(1, 'months')
-			.startOf('month')
-			.add(20, 'years');
-		return momentEnlistOrCommDate.format('DD/MM/YYYY');
-	} catch (error) {
-		throw new Error(
-			`Error encountered while attempting to calculate retirement date.\n${error}`
-		);
-	}
+  if (!enlistOrCommissionDate || enlistOrCommissionDate === '') {
+    throw new Error('Enlistment or commission date must be specified.');
+  }
+  const retirementDateMoment = moment(enlistOrCommissionDate, 'MM/DD/YYYY')
+    .add(1, 'months')
+    .startOf('month')
+    .add(20, 'years');
+  const retirementDate = retirementDateMoment.isValid()
+    ? retirementDateMoment.format('MM/DD/YYYY')
+    : '';
+  if (retirementDate === '') {
+    throw new Error('Invalid enlistment or commission date specified.');
+  }
+  return retirementDate;
 };
+
 /**
  * Calculates the fiscal year the specified retirement date belongs to.
  * @param {string} retirementDate - The retirement date
@@ -34,36 +38,40 @@ const calculateRetirementDate = function calculateRetirementDate(
  * @throws Error
  */
 const getFiscalYear = function getFiscalYear(retirementDate) {
-	try {
-		const retirementMonth = moment(retirementDate, 'DD/MM/YYYY').month();
-		let yearOffset = 0;
+  if (!retirementDate || retirementDate === '') {
+    throw new Error('Retirement date must be specified.');
+  }
 
-		// Months in momentjs are 0 based.  Handle cases when the
-		// retirement falls on a month when the fiscal year changes
-		if (retirementMonth >= 9 && retirementMonth <= 11) {
-			yearOffset = 1;
-		}
+  const retirementDateMoment = moment(retirementDate, 'MM/DD/YYYY');
+  if (!retirementDateMoment.isValid()) {
+    throw new Error('Invalid retirement date specified.');
+  }
 
-		const fiscalYearEnd = moment(retirementDate, 'DD/MM/YYYY')
-			.add(yearOffset, 'year')
-			.month('September')
-			.endOf('month');
+  const retirementMonth = retirementDateMoment.month();
+  let yearOffset = 0;
 
-		const fiscalYearStart = moment(fiscalYearEnd, 'DD/MM/YYYY')
-			.clone()
-			.subtract(1, 'year')
-			.month('October')
-			.startOf('month');
+  // Months in momentjs are 0 based.  Handle cases when the
+  // retirement falls on a month when the fiscal year changes
+  if (retirementMonth >= 9 && retirementMonth <= 11) {
+    yearOffset = 1;
+  }
 
-		return {
-			fiscalYeartStart: moment(fiscalYearStart).format('MM/DD/YYYY'),
-			fiscalYearEnd: moment(fiscalYearEnd).format('MM/DD/YYYY'),
-		};
-	} catch (error) {
-		throw new Error(
-			`Error encountered while calculating fiscal year.\n${error}`
-		);
-	}
+  const fiscalYearEndMoment = retirementDateMoment
+    .clone()
+    .add(yearOffset, 'year')
+    .month('September')
+    .endOf('month');
+
+  const fiscalYearStartMoment = fiscalYearEndMoment
+    .clone()
+    .subtract(1, 'year')
+    .month('October')
+    .startOf('month');
+
+  return {
+    fiscalYeartStart: fiscalYearStartMoment.format('MM/DD/YYYY'),
+    fiscalYearEnd: fiscalYearEndMoment.format('MM/DD/YYYY'),
+  };
 };
 
 /**
@@ -74,45 +82,56 @@ const getFiscalYear = function getFiscalYear(retirementDate) {
  * @throws Error
  */
 const monthsIntoFiscalYear = function monthsIntoFiscalYear(retirementDate) {
-	try {
-		const currentFiscalYear = getFiscalYear(retirementDate);
+  try {
+    if (!retirementDate || retirementDate === '') {
+      throw new Error('Retirement date must be specified.');
+    }
 
-		const start = moment(currentFiscalYear.fiscalYeartStart, 'MM/DD/YYYY');
-		const end = moment(retirementDate, 'DD/MM/YYYY');
-		const range = moment.range(start, end);
+    const currentFiscalYear = getFiscalYear(retirementDate);
 
-		return range.diff('months');
-	} catch (error) {
-		throw new Error(
-			`Error encountered while calculating months in range.\n${error}`
-		);
-	}
+    const startMoment = moment(
+      currentFiscalYear.fiscalYeartStart,
+      'MM/DD/YYYY'
+    );
+    const endMoment = moment(retirementDate, 'MM/DD/YYYY');
+    const range = moment.range(startMoment, endMoment);
+
+    return range.diff('months');
+  } catch (error) {
+    throw new Error(error);
+  }
 };
 
 /**
- * Calculates the mas standard days of leave
+ * Calculates the max standard days of leave
  * @param {string} retirementDate - The retirement date
  * @param {number} conusOconusDays - Leave days based on CONUS or OCONUS
  * @returns {number} The max standard days of leave
  * @throws Error
  */
 const maxStandardDaysOfLeave = function maxStandardDaysOfLeave(
-	retirementDate,
-	conusOconusDays
+  retirementDate,
+  conusOconusDays
 ) {
-	try {
-		//  60 days for fiscal year previous to retirement date (Fiscal year is Oct 1 – Sep 30th)
-		let daysOfLeave = 60;
+  try {
+    if (!retirementDate || retirementDate === '') {
+      throw new Error('Retirement date must be specified.');
+    }
 
-		const months = monthsIntoFiscalYear(retirementDate);
-		const daysOfLeaveInFiscalYear = months * 2.5;
+    if (!conusOconusDays || conusOconusDays === '' || conusOconusDays < 0) {
+      throw new Error('CONUS or OCONUS days must be specified.');
+    }
 
-		return (daysOfLeave += daysOfLeaveInFiscalYear + conusOconusDays);
-	} catch (error) {
-		throw new Error(
-			`Error encountered while calculating max days of leave.\n${error}`
-		);
-	}
+    //  60 days for fiscal year previous to retirement date (Fiscal year is Oct 1 – Sep 30th)
+    let daysOfLeave = 60;
+
+    const months = monthsIntoFiscalYear(retirementDate);
+    const daysOfLeaveInFiscalYear = months * 2.5;
+
+    return (daysOfLeave += daysOfLeaveInFiscalYear + conusOconusDays);
+  } catch (error) {
+    throw new Error(error);
+  }
 };
 
 /**
@@ -123,24 +142,30 @@ const maxStandardDaysOfLeave = function maxStandardDaysOfLeave(
  * @throws Error
  */
 const startTerminalPTDY = function startTerminalPTDY(
-	retirementDate,
-	totalDaysOfLeave
+  retirementDate,
+  totalDaysOfLeave
 ) {
-	try {
-		const startTerminalPTDYDate = moment(retirementDate, 'DD/MM/YYYY').subtract(
-			totalDaysOfLeave,
-			'days'
-		);
-		return startTerminalPTDYDate.format('MM/DD/YYYY');
-	} catch (error) {
-		throw new Error(
-			`Error encountered while calculating terminal PTDY date.\n${error}`
-		);
-	}
+  if (!retirementDate || retirementDate === '') {
+    throw new Error('Retirement date must be specified.');
+  }
+
+  if (!totalDaysOfLeave || totalDaysOfLeave < 0) {
+    throw new Error('Total days of leave must be specified.');
+  }
+
+  const retirementDateMoment = moment(retirementDate, 'MM/DD/YYYY');
+  if (!retirementDateMoment.isValid()) {
+    throw new Error('Invalid retirement date specified.');
+  }
+
+  const startTerminalPTDYDate = retirementDateMoment
+    .clone()
+    .subtract(totalDaysOfLeave, 'days');
+  return startTerminalPTDYDate.format('MM/DD/YYYY');
 };
 
 module.exports = {
-	calculateRetirementDate,
-	maxStandardDaysOfLeave,
-	startTerminalPTDY,
+  calculateRetirementDate,
+  maxStandardDaysOfLeave,
+  startTerminalPTDY,
 };
