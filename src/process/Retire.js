@@ -9,7 +9,7 @@ const {
 } = require('../helpers/calculations');
 
 const validateFirstOfMonthDate = function validateFirstOfMonthDate(value) {
-  const pass = value.match(/01\/\d{2}\/\d{4}/);
+  const pass = value.match(/\d{2}\/01\/\d{4}/);
   if (pass) {
     return true;
   }
@@ -36,7 +36,7 @@ const validateInputIsNumbersOnly = function validateInputIsNumbersOnly(value) {
 };
 
 const retirementDateChoices = [
-  'Enter date (01/MM/YYYY)',
+  'Enter date (MM/01/YYYY)',
   'Calculate 20 years in for me',
 ];
 
