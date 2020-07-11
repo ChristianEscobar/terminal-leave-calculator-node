@@ -1,7 +1,6 @@
 'use strict';
 
 const inquirer = require('inquirer');
-const moment = require('moment');
 const {
   calculateRetirementDate,
   maxStandardDaysOfLeave,
@@ -141,14 +140,11 @@ const promptUser = async function promptUser() {
 class Retire {
   constructor() {
     this.situation = 'I plan to retire';
-    this.plannedRetirementDate = '';
-    this.CONUSorOCONUS = '';
-    this.CONUSorOCONUSDays = 0;
-    this.daysOfLeave = 0;
+    this.userInput = null;
   }
 
   async run() {
-    const userInput = await promptUser();
+    this.userInput = await promptUser();
   }
 }
 
